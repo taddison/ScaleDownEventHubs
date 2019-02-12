@@ -6,51 +6,92 @@ using Microsoft.Rest;
 using Microsoft.Azure.Management.EventHub;
 using Microsoft.Azure.Management.EventHub.Models;
 using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
 
 namespace ScaleDownEventHubs
 {
     public static class ScaleDown
     {
         [FunctionName("ScaleDown")]
-        public static void Run([TimerTrigger("0 30 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        public static void Run([TimerTrigger("* */1 * * * *")]TimerInfo myTimer, TraceWriter log)
         {
             log.Info($"ScaleDown execution started");
 
             log.Info("Getting credentials");
             var creds = GetCredentials(log);
 
-            var namespaces = new List<EventhubNamespace>
+            var subscriptions = new List<string>()
             {
-                new EventhubNamespace("<subscription id>", "<resource group>", "<namespace>", 1)
+                "fcba2349-45f5-4b30-a9bb-b075cec3622f"
             };
-
-            foreach (var ns in namespaces)
+            
+            foreach (var subscription in subscriptions)
             {
-                log.Info($"Processing scaledown for {ns.Namespace} in {ns.ResourceGroup}");
-                ScaleDownNamespace(ns, creds, log);
+                log.Info($"Processing scaledown for {subscription}");
+                ScaleDownNamespacesInSubscription(subscription, creds, log);
             }
             
             log.Info("ScaleDown execution completed");
         }
 
-        private static void ScaleDownNamespace(EventhubNamespace ns, TokenCredentials credentials, TraceWriter log)
+        private static void ScaleDownNamespacesInSubscription(string subscriptionId, TokenCredentials credentials, TraceWriter log)
         {
             var ehClient = new EventHubManagementClient(credentials)
             {
-                SubscriptionId = ns.SubscriptionId
+                SubscriptionId = subscriptionId
             };
 
+            log.Info($"Getting namespaces for {subscriptionId}");
+            var namespaces = GetNamespacesForSubscription(ehClient);
+
+            foreach (var ns in namespaces)
+            {
+                try
+                {
+                    ScaleDownNamespace(ns, ehClient, log);
+                } catch (Exception e)
+                {
+                    log.Error("Error", e);
+                }
+            }
+        }
+
+        private static IEnumerable<EventhubNamespace> GetNamespacesForSubscription(EventHubManagementClient ehClient)
+        {
+            var nsList = new List<EventhubNamespace>();
+
+            var namespaces = ehClient.Namespaces.List().ToList();
+
+
+            foreach(var ns in namespaces)
+            {
+                var resourceGroupName = Regex.Match(ns.Id, @".*\/resourceGroups\/([\w-]+)\/providers.*").Groups[1].Value;
+                int targetThroughputUnits = 1;
+                if (ns.Tags.ContainsKey("ScaleDownTUs"))
+                {
+                    int.TryParse(ns.Tags["ScaleDownTUs"], out targetThroughputUnits);
+                }
+                nsList.Add(new EventhubNamespace(ehClient.SubscriptionId, resourceGroupName, ns.Name, targetThroughputUnits));
+            }
+
+            return nsList;
+        }
+
+        private static void ScaleDownNamespace(EventhubNamespace ns, EventHubManagementClient ehClient, TraceWriter log)
+        {
             log.Info("Querying namespace information");
             var nsInfo = ehClient.Namespaces.Get(ns.ResourceGroup, ns.Namespace);
-            if (nsInfo.Sku.Capacity <= ns.Capacity)
+            if (nsInfo.Sku.Capacity <= ns.TargetThroughputUnits)
             {
-                log.Info($"Namespace {ns.Namespace} in {ns.ResourceGroup} already below target capacity (Current:{nsInfo.Sku.Capacity} Target:{ns.Capacity})");
+                log.Info($"Namespace {ns.Namespace} in {ns.ResourceGroup} already below target capacity (Current:{nsInfo.Sku.Capacity} Target:{ns.TargetThroughputUnits})");
                 return;
             }
 
             var nsUpdate = new EHNamespace()
             {
-                Sku = new Sku(nsInfo.Sku.Name, capacity: ns.Capacity)
+                Sku = new Sku(nsInfo.Sku.Name, capacity: ns.TargetThroughputUnits)
             };
 
             log.Info($"Updating Namespace {ns.Namespace} in {ns.ResourceGroup} from {nsInfo.Sku.Capacity} to {nsUpdate.Sku.Capacity}");
