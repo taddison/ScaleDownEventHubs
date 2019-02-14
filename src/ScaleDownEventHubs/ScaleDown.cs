@@ -21,7 +21,7 @@ namespace ScaleDownEventHubs
 
             log.Info("Getting credentials");
             var creds = GetCredentials(log);
-
+        
             var subscriptions = new List<string>()
             {
                 "fcba2349-45f5-4b30-a9bb-b075cec3622f"
