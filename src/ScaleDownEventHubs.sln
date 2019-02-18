@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScaleDownEventHubs", "ScaleDownEventHubs\ScaleDownEventHubs.csproj", "{284BC921-3C04-408D-8927-C9E1A705915D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaleDownEventHubsv2", "ScaleDownEventHubsv2\ScaleDownEventHubsv2.csproj", "{15A307E1-3408-4E08-AF08-B94AC5F1406E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaleDownEventHubs", "ScaleDownEventHubs\ScaleDownEventHubs.csproj", "{15A307E1-3408-4E08-AF08-B94AC5F1406E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
