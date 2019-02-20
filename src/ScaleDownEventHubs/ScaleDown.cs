@@ -16,6 +16,8 @@ namespace ScaleDownEventHubs
 {
     public static class ScaleDown
     {
+        private const string SCALE_DOWN_TU_TAG = "ScaleDownTUs";
+
         [FunctionName("ScaleDown")]
         public static void Run([TimerTrigger("0 */1 * * * *")]TimerInfo myTimer, ILogger log, ExecutionContext context)
         {
@@ -90,9 +92,9 @@ namespace ScaleDownEventHubs
                 var resourceGroupName = Regex.Match(ns.Id, @".*\/resourceGroups\/([\w-]+)\/providers.*").Groups[1].Value;
 
                 int targetThroughputUnits = 1;
-                if (ns.Tags.ContainsKey("ScaleDownTUs"))
+                if (ns.Tags.ContainsKey(SCALE_DOWN_TU_TAG))
                 {
-                    int.TryParse(ns.Tags["ScaleDownTUs"], out targetThroughputUnits);
+                    int.TryParse(ns.Tags[SCALE_DOWN_TU_TAG], out targetThroughputUnits);
                 }
 
                 nsList.Add(new EventhubNamespace(ehClient.SubscriptionId, resourceGroupName, ns.Name, targetThroughputUnits));
