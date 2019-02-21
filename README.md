@@ -1,5 +1,14 @@
 # ScaleDownEventHubs
+
 Scale down Azure Event Hub Namespaces automatically.
+
+## Deployment Guidelines
+
+- Clone the function and modify the timer to the desired frequency (e.g. daily)
+- Deploy the function to Azure
+- Create a service principal
+- Set the application settings with the principal details (client id, secret, and tenant)
+- Add the service principal as a contributor on all Event Hub Namespaces you want to be automaticlaly scaled down
 
 Once deployed as an Azure function and configured with an appropriate service principal, the app will query all subscriptions it has access to and scale down every namespace it has access to to 1 throughput unit.
 
