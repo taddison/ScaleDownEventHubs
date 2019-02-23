@@ -16,15 +16,23 @@ By default it will scale to 1 TU if the current TU is > 1.  To override this beh
 
 ## Scripts
 
+These scripts use the [Az module].
+
 ### Create a service principal
 
 ```powershell
-$appDisplayName = "EventHubScaler" # This can be anything you want
-$appPassword = "<a strong password for your app>" # The password is your app's ClientSecret
+Login-AzAccount
 
-Login-AzureRmAccount
-$sp = New-AzureRmADServicePrincipal -DisplayName $appDisplayName -Password $appPassword
-$sp | Select DisplayName, ApplicationId # ApplicationId is your app's ClientId
+$sp = New-AzADServicePrincipal -DisplayName "EventHubScaler"
+$applicationId = $sp.ApplicationId
+
+$BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($sp.Secret)
+$password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
+
+# Save these for later!
+Write-Output "ClientId: $applicationId"
+Write-Output "ClientSecret: $password"
 ```
 
 ### Add the service principal to all Event Hub Namespaces
@@ -36,3 +44,5 @@ $sp | Select DisplayName, ApplicationId # ApplicationId is your app's ClientId
 ## Older versions
 
 An earlier version of this app ([See this blog post for more details](http://tjaddison.com/2017/12/10/Auto-deflating-Event-Hubs-with-a-function-app)) required you to specify subscription ids in the function..
+
+[Az module]: https://docs.microsoft.com/en-us/powershell/azure/install-az-ps
