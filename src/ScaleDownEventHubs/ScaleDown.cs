@@ -87,6 +87,11 @@ namespace ScaleDownEventHubs
             var nsList = new List<EventhubNamespace>();
             foreach (var ns in namespaces)
             {
+                if(!(ns.IsAutoInflateEnabled ?? false)) {
+                    log.LogInformation($"Namespace {ns.Name} not configured for auto-inflate - skipping");
+                    continue;
+                }
+
                 log.LogInformation($"Processing namespace {ns.Name} to extract RG and Throughput Units");
 
                 var resourceGroupName = Regex.Match(ns.Id, @".*\/resourceGroups\/([\w-]+)\/providers.*").Groups[1].Value;

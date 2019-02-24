@@ -37,8 +37,53 @@ Write-Output "ClientSecret: $password"
 
 ### Add the service principal to all Event Hub Namespaces
 
+This script will add the specified app as a contributor on each Event Hub Namespace.  The script below is configured in 'What If' mode, so will only report what it would do - change `$WhatIf = $true` to `$WhatIf = $false` to actually make changes.
+
+The script will only add the permission to event hubs which are configured with auto-inflate.
+
 ```powershell
-#todo
+Login-AzAccount
+
+$appName = "EventHubScaler"
+$appRole = "Contributor"
+$WhatIf = $true # set to false to add role
+
+$applicationId = (Get-AzADServicePrincipal -DisplayName $appName).ApplicationId
+$subs = Get-AzSubscription
+foreach($sub in $subs) {
+    Set-AzContext $sub | Out-Null
+    Write-Output "Context set to $($sub.Name)"
+
+    $hubs = Get-AzEventHubNamespace
+    foreach($hub in $hubs) {
+        $hubName = $hub.Name
+        $capacity = $hub.Sku.Capacity
+        $autoInflate = $hub.IsAutoInflateEnabled
+        $maxCapacity = $hub.MaximumThroughputUnits
+
+        $assignments = Get-AzRoleAssignment -Scope $hub.Id -RoleDefinitionName $appRole -ServicePrincipalName $applicationId 
+        if($null -eq $assignments) {
+            $assignString = ""
+        } else {
+            $assignString = "[ASSIGNED]"
+        }
+        
+        if($autoInflate) {
+            Write-Output "Namespace:$hubName :: TU:$capacity/$maxCapacity $scaleDownTUs $assignString"
+
+            if($null -eq $assignments) {
+                if($WhatIf -eq $false) {
+                    Write-Output "Adding $appRole role for $appName on $hubName"
+                    New-AzRoleAssignment -Scope $hub.Id -RoleDefinitionName $appRole -ApplicationId $applicationId | Out-Null
+                } else {
+                    Write-Output "[WHATIF] Adding $appRole role for $appName on $hubName"
+                }
+            }
+        } else {
+            Write-Output "Namespace:$hubName :: TU:$capacity $assignString"
+        }
+    }
+}
 ```
 
 ## Older versions
