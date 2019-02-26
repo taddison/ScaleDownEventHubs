@@ -65,7 +65,7 @@ foreach($sub in $subs) {
         if($null -eq $assignments) {
             $assignString = ""
         } else {
-            $assignString = "[ASSIGNED]"
+            $assignString = "[$appName ASSIGNED]"
         }
         
         if($autoInflate) {
