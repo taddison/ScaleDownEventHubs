@@ -1,7 +1,7 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "<your connection string>",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "ClientId": "<your client id>",
     "ClientSecret": "<your client secret>",
     "TenantId": "<your tenant id>",
