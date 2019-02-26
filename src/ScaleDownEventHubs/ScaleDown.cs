@@ -19,7 +19,7 @@ namespace ScaleDownEventHubs
         private const string SCALE_DOWN_TU_TAG = "ScaleDownTUs";
 
         [FunctionName("ScaleDown")]
-        public static void Run([TimerTrigger("0 0 0/6 * * *")]TimerInfo myTimer, ILogger log, ExecutionContext context)
+        public static void Run([TimerTrigger("0 0 */6 * * *")]TimerInfo myTimer, ILogger log, ExecutionContext context)
         {
             var config = new ConfigurationBuilder()
                 .SetBasePath(context.FunctionAppDirectory)
