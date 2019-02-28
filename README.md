@@ -4,7 +4,7 @@ Scale down Azure Event Hub Namespaces automatically.
 
 ## Deployment Guidelines
 
-- Clone the function and modify the timer to the desired frequency (e.g. daily)
+- Clone the function and modify the timer to the desired frequency (e.g. daily - defaults to every six hours)
 - Deploy the function to Azure
 - Create a service principal
 - Set the application settings with the principal details (client id, secret, and tenant)
