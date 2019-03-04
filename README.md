@@ -1,6 +1,6 @@
 # ScaleDownEventHubs
 
-Scale down Azure Event Hub Namespaces automatically.
+Scale down Azure Event Hub Namespaces automatically.  More details available in [this blog post][ScaleDown new blog post].
 
 ## Deployment Guidelines
 
@@ -30,7 +30,6 @@ $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($sp.Secret)
 $password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
 
-# Save these for later!
 Write-Output "ClientId: $applicationId"
 Write-Output "ClientSecret: $password"
 ```
@@ -91,3 +90,4 @@ foreach($sub in $subs) {
 An earlier version of this app ([See this blog post for more details](http://tjaddison.com/2017/12/10/Auto-deflating-Event-Hubs-with-a-function-app)) required you to specify subscription ids in the function..
 
 [Az module]: https://docs.microsoft.com/en-us/powershell/azure/install-az-ps
+[ScaleDown new blog post]: https://tjaddison.com/2019/02/28/Auto-scale-down-all-Event-Hub-namespaces-with-Azure-Functions
