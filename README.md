@@ -12,7 +12,7 @@ Scale down Azure Event Hub Namespaces automatically.  More details available in 
 
 Once deployed as an Azure function and configured with an appropriate service principal, the app will query all subscriptions it has access to and scale down every namespace it has access to to 1 throughput unit.
 
-By default it will scale to 1 TU if the current TU is > 1.  To override this behaviour create a tag on your namespace with the key `ScaleDownTUs` and a value equal to the target number of TUs (e.g. 5).  If the namespace TU >= the tag, then no scale down operation will happen.
+By default it will scale to 1 TU if the current TUs are > 1.  To override this behaviour create a tag on your namespace with the key `ScaleDownTUs` and a value equal to the target number of TUs (e.g. 5).  If the namespace TU <= the tag value, then no scale down operation will happen.
 
 ## Scripts
 
